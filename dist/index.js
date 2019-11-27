@@ -5,21 +5,13 @@
 
   function get_equi_triangle(top_pos, height, col) {
     const side = height / Math.sqrt(3);
-    const inner_side = side / 2;
-    const inner_top = top_pos + height / 3;
-    const inner_height = height / 2;
     const pos = [
       [0, top_pos],
       [side, top_pos + height],
       [-side, top_pos + height]
     ];
-    const inner_pos = [
-      [0, inner_top],
-      [inner_side, inner_top + inner_height],
-      [-inner_side, inner_top + inner_height]
-    ];
 
-    return { pos, inner_pos, col };
+    return { pos, col };
   }
 
   function round(val, magnitude) {
@@ -2729,19 +2721,26 @@
       p.noStroke();
     };
 
+    p.draw = function() {
+      p.translate(p.width / 2, 100);
+      const triangles = generate_triangles();
+      triangles.forEach(draw_triangle);
+    };
+
     function generate_triangles() {
       let triangles = [];
 
       for (let i = 0; i < number_of_triangles; i++) {
-        const triangle_height = round(p.random(-t_variance, t_variance) + t_mean_size, 50);
-        const top = get_triangle_pos(i, triangle_height);
+        const height = round(p.random(-t_variance, t_variance) + t_mean_size, 50);
+        const top = get_triangle_pos(i, height);
         const color = p.floor(p.random() * palette.colors.length);
 
-        const next_triangle = get_equi_triangle(top, triangle_height, color);
+        const next_triangle = get_equi_triangle(top, height, color);
 
         if (i == 0) triangles.push(next_triangle);
         else triangles = add_triangle(triangles, next_triangle);
       }
+
       return triangles;
     }
 
@@ -2751,38 +2750,25 @@
       return round(p.random(0, stem_length - triangle_height), 50);
     }
 
-    p.draw = function() {
-      p.translate(p.width / 2, 100);
-      const triangles = generate_triangles();
-      triangles.forEach(draw_triangle);
-    };
-
     function add_triangle(ts, t) {
       const diff1 = index
         .difference(
           [t.pos],
           ts.map(t => [t.pos])
         )
-        .map(pos => pos.map(pp => ({ col: t.col, pos: pp })))
-        .flat();
+        .flatMap(pos => pos.map(pp => ({ col: t.col, pos: pp })));
 
-      const diff2 = ts
-        .map(tr =>
-          index
-            .difference([tr.pos], [t.pos])
-            .map(pos => pos.map(pp => ({ col: tr.col, pos: pp })))
-            .flat()
-        )
-        .flat();
+      const diff2 = ts.flatMap(tr =>
+        index
+          .difference([tr.pos], [t.pos])
+          .flatMap(pos => pos.map(pp => ({ col: tr.col, pos: pp })))
+      );
 
-      const intersections = ts
-        .map(tr =>
-          index
-            .intersection([t.pos], [tr.pos])
-            .map(pos => pos.map(pp => ({ col: col_arr(t.col, tr.col), pos: pp })))
-            .flat()
-        )
-        .flat();
+      const intersections = ts.flatMap(tr =>
+        index
+          .intersection([t.pos], [tr.pos])
+          .flatMap(pos => pos.map(pp => ({ col: combine(t.col, tr.col), pos: pp })))
+      );
 
       return intersections.concat(diff1, diff2);
     }
@@ -2796,7 +2782,7 @@
       p.endShape(p.CLOSE);
     }
 
-    function col_arr(a, b) {
+    function combine(a, b) {
       const arr = [
         [5, 2, 3, 4, 5, 1],
         [2, 3, 4, 5, 0, 2],
@@ -2810,7 +2796,7 @@
     }
 
     p.keyPressed = function() {
-      if (p.keyCode === 80) p.saveCanvas('sketch_' + THE_SEED, 'png');
+      if (p.keyCode === 80) p.saveCanvas('pinetree_' + THE_SEED, 'png');
     };
   };
   new p5(sketch);
