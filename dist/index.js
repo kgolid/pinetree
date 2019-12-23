@@ -878,7 +878,6 @@
       sort(keys, values, left, j, compare);
       sort(keys, values, j + 1, right, compare);
   }
-  //# sourceMappingURL=splay.esm.js.map
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -2705,16 +2704,16 @@
   };
 
   const stem_length = 600;
-  const number_of_triangles = 8;
+  const number_of_triangles = 10;
   const t_mean_size = 300;
   const t_variance = 75;
-  const palette = get('bekk03m');
+  const palette = get('bekk12m');
 
   let sketch = function(p) {
     let THE_SEED;
 
     p.setup = function() {
-      p.createCanvas(800, 800);
+      p.createCanvas(600, 600);
       THE_SEED = p.floor(p.random(9999999));
       p.randomSeed(THE_SEED);
       p.noLoop();
@@ -2722,7 +2721,7 @@
     };
 
     p.draw = function() {
-      p.translate(p.width / 2, 100);
+      p.translate(p.width / 2, 0);
       const triangles = generate_triangles();
       triangles.forEach(draw_triangle);
     };
@@ -2751,11 +2750,9 @@
     }
 
     function add_triangle(ts, t) {
+      const ts_arr = ts.map(t => [t.pos]);
       const diff1 = index
-        .difference(
-          [t.pos],
-          ts.map(t => [t.pos])
-        )
+        .difference([t.pos], ts_arr)
         .flatMap(pos => pos.map(pp => ({ col: t.col, pos: pp })));
 
       const diff2 = ts.flatMap(tr =>

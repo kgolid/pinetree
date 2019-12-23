@@ -3,16 +3,16 @@ import * as tome from 'bekk-chromotome';
 import polyclip from 'polygon-clipping';
 
 const stem_length = 600;
-const number_of_triangles = 8;
+const number_of_triangles = 10;
 const t_mean_size = 300;
 const t_variance = 75;
-const palette = tome.get('bekk03m');
+const palette = tome.get('bekk12m');
 
 let sketch = function(p) {
   let THE_SEED;
 
   p.setup = function() {
-    p.createCanvas(800, 800);
+    p.createCanvas(600, 600);
     THE_SEED = p.floor(p.random(9999999));
     p.randomSeed(THE_SEED);
     p.noLoop();
@@ -20,7 +20,7 @@ let sketch = function(p) {
   };
 
   p.draw = function() {
-    p.translate(p.width / 2, 100);
+    p.translate(p.width / 2, 0);
     const triangles = generate_triangles();
     triangles.forEach(draw_triangle);
   };
@@ -49,11 +49,9 @@ let sketch = function(p) {
   }
 
   function add_triangle(ts, t) {
+    const ts_arr = ts.map(t => [t.pos]);
     const diff1 = polyclip
-      .difference(
-        [t.pos],
-        ts.map(t => [t.pos])
-      )
+      .difference([t.pos], ts_arr)
       .flatMap(pos => pos.map(pp => ({ col: t.col, pos: pp })));
 
     const diff2 = ts.flatMap(tr =>
